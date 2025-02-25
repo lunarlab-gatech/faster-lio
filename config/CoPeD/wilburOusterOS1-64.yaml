@@ -1,0 +1,78 @@
+# Assumptions: 
+#   - CoPeD LIDAR messages return points in meters.
+#   - LIDAR employed is OS1-64.
+#   - IMU sensor rate is 125 Hz.
+#       - Table II in CoPeD paper states Sensor Rate is 1000 hz, even though rosbag contains rate of 125 Hz.
+
+
+# Assumptions:
+#   - For calibration files provided with COPED:
+#       - Intrinsic rotations, application order of RPY, assumed angles in radians. 
+#       - Roll applies to X, Pitch applies to Y, and Yaw applies to Z.
+#       - XYZ assumed to be in meters.
+
+common:
+    lid_topic:  "/robot0/lidar_points" 
+    imu_topic:  "/robot0/imu/data"    
+    time_sync_en: false         # CoPeD paper Section III-A: mentions both hardware and software time synchronization
+    
+preprocess:
+    lidar_type: 3                 # 1 for Livox serials LiDAR, 2 for Velodyne LiDAR, 3 for ouster LiDAR, 
+    scan_line: None               # Value not confirmed - Appears to be unused for Ouster LIDAR
+    blind: 0.3                    # Specify to throw out points closer than this min range. See 
+                                    # https://data.ouster.io/downloads/datasheets/datasheet-revd-v2p0-os1.pdf
+                                    # for minimum range of the OS1-64 LIDAR.
+    time_scale: None              # Value not confirmed - Only used for Velodyne 
+
+mapping:
+    # These are default values (not calculated), but they seem to work well empirically
+    acc_cov: 0.1
+    gyr_cov: 0.1
+    b_acc_cov: 0.0001
+    b_gyr_cov: 0.0001
+
+    # Calculated values, but very likely wrong. Need to be recalculated.
+    # See the datasheet for the Lord Microstrain 3DM-GX5-25 IMU: https://store.clearpathrobotics.com/products/3dm-gx5-25
+    # acc_cov: 0.000007518 # (meters/second^2)^2
+    # gyr_cov: 0.000000952 # (radians/second)^2
+    # b_acc_cov: 0.000000154    # (meters/second^2)^2
+    # b_gyr_cov: 0.000000001504 # (radians/second)^2
+
+    fov_degree: None         # Unused
+    det_range: None          # Unused
+
+    # Calculated using information from https://github.com/arplaboratory/CoPeD/tree/main 
+    # and relative_meas_gen/scripts/calcTransforms.py
+    extrinsic_est_en:  false      # true: enable the online estimation of IMU-LiDAR extrinsic
+    extrinsic_T: [ -1.08647519, -0.5975665, 0.27315352]
+    extrinsic_R: [-0.99955557, -0.02109845, -0.02105986,
+                   0.02097641, -0.99976197,  0.00599915,
+                  -0.02118142,  0.00555472,  0.99976022]
+
+    # Ouster LIDAR coordinate frame: https://static.ouster.dev/sensor-docs/image_route1/image_route2/sensor_data/sensor-data.html
+
+publish:
+    path_publish_en:  false      # true: Publish path in online mode even if path_save_en is false.
+
+## ======= NOTE: Everything below is for previous configuration and has yet to be updated =======
+    scan_publish_en:  true       # false: close all the point cloud output
+    scan_effect_pub_en: true     # true: publish the pointscloud of effect point
+    dense_publish_en: false      # false: low down the points number in a global-frame point clouds scan.
+    scan_bodyframe_pub_en: true  # true: output the point cloud scans in IMU-body-frame
+
+path_save_en: true # true: Publish the path
+
+pcd_save:
+    pcd_save_en: true
+    interval: -1                 # how many LiDAR frames saved in each pcd file; 
+                                 # -1 : all frames will be saved in ONE pcd file, may lead to memory crash when having too much frames.
+feature_extract_enable: false
+point_filter_num: 3
+max_iteration: 3
+filter_size_surf: 0.5
+filter_size_map: 0.5             # Not used yet, the code is 0, which means that all points in the downsampled scan are added map
+cube_side_length: 1000
+
+ivox_grid_resolution: 0.5        # default=0.2
+ivox_nearby_type: 18             # 6, 18, 26
+esti_plane_threshold: 0.1        # default=0.1
