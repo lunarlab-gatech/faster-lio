@@ -35,12 +35,12 @@ mapping:
     fov_degree: None         # Unused
     det_range: None          # Unused
 
-    # Calculated using rosrun tf tf_echo from /wilbur/imu_link to /wilbur/ouster_center_link
+    # Calculated using rosrun tf tf_echo from /wanda/imu_link to /wanda/ouster_link
     extrinsic_est_en:  false  # true: enable the online estimation of IMU-LiDAR extrinsic
-    extrinsic_T: [ -0.055, -0.305, 0.287]
-    extrinsic_R: [-0.9995581, -0.0200614,  0.0219350,
-                   0.0199294, -0.9997820, -0.0062186,
-                   0.0220549, -0.0057787,  0.9997401]
+    extrinsic_T: [ 0.106, -0.024, 0.478]
+    extrinsic_R: [0.9980399,  0.0599050, -0.0181022,
+                 -0.0599769,  0.9981938, -0.0034566,
+                  0.0178624,  0.0045355,  0.9998302]
 
     # Ouster LIDAR coordinate frame: https://static.ouster.dev/sensor-docs/image_route1/image_route2/sensor_data/sensor-data.html
 

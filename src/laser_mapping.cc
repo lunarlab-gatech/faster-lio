@@ -234,9 +234,10 @@ bool LaserMapping::LoadParamsFromYAML(const std::string &yaml_file) {
 
 void LaserMapping::SubAndPubToROS(ros::NodeHandle &nh) {
     // ROS subscribe initialization
-    std::string lidar_topic, imu_topic;
+    std::string lidar_topic, imu_topic, odom_topic;
     nh.param<std::string>("common/lid_topic", lidar_topic, "/livox/lidar");
     nh.param<std::string>("common/imu_topic", imu_topic, "/livox/imu");
+    nh.param<std::string>("common/odom_topic", odom_topic, "/Odometry");
 
     if (preprocess_->GetLidarType() == LidarType::AVIA) {
         sub_pcl_ = nh.subscribe<livox_ros_driver::CustomMsg>(
@@ -256,7 +257,7 @@ void LaserMapping::SubAndPubToROS(ros::NodeHandle &nh) {
     pub_laser_cloud_world_ = nh.advertise<sensor_msgs::PointCloud2>("/cloud_registered", 100000);
     pub_laser_cloud_body_ = nh.advertise<sensor_msgs::PointCloud2>("/cloud_registered_body", 100000);
     pub_laser_cloud_effect_world_ = nh.advertise<sensor_msgs::PointCloud2>("/cloud_registered_effect_world", 100000);
-    pub_odom_aft_mapped_ = nh.advertise<nav_msgs::Odometry>("/Odometry", 100000);
+    pub_odom_aft_mapped_ = nh.advertise<nav_msgs::Odometry>(odom_topic, 100000);
     pub_path_ = nh.advertise<nav_msgs::Path>("/path", 100000);
 }
 
